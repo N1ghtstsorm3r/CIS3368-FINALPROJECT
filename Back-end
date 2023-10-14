@@ -12,7 +12,6 @@ from sql import execute_read_myquery
  
 import creds
 
-#APP will be the what pulls the application to the front for POSTMAN
 app = flask.Flask(__name__)  # This is your application name this is a restAPI file so the name would be RESTAPI
 app.config['DEBUG'] = True 
 
@@ -21,7 +20,7 @@ app.config['DEBUG'] = True
 def defaultmessage():
     return "<h1> Welcome to a Paradise for Seniors! </h1>"
 
-#____________________________________GET ALL FLOORS_______________________
+#____________________________________FLOORS INFORMATION_______________________
 
 @app.route('/api/floor/all', methods=['GET'])  #ENDPOINT http://127.0.0.1:5000/api/floor/all
 def floor_list():
@@ -61,7 +60,45 @@ def floor_delete():
     execute_myquery(conn, sql, (idtodelete,))
     conn.close()
     return "Floor is now unavailable"
-#____________________________________GET ALL ROOMS_______________________
+
+#POST FLOOR 
+@app.route('/api/floor', methods=['POST'])
+def add_floor():
+    request_data = request.get_json()
+    newlevel = request_data['level']
+    newname = request_data['name']
+
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
+
+    # Had to fix this SQL query. Using parameters instead of string substitution.
+    sql = "INSERT INTO residents(firstname, lastname, age) VALUES (%s, %s)"
+    execute_myquery(conn, sql, (newlevel, newname))
+    conn.close()  # Connection would not work without being repeated and closed
+    return 'New resident has entered!'
+
+#UPDATE FLOOR 
+@app.route('/api/floor/<int:id>', methods=['PUT'])
+def update_floor():
+    if 'id' in request.args: #http://127.0.0.1:5000/api/floor/<int:id>
+        id = int(request.args['id']) #User has to input ID
+    else:
+        return 'ID does not exist!'
+
+    request_data = request.get_json()
+    updatename = request_data['name']
+    updatelevel = request_data['level']
+
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
+
+   #SQL query parameters were fixed
+    sql = "UPDATE floor SET name=%s, level=%s"
+    execute_myquery(conn, sql, (updatename, updatelevel, id))
+    conn.close()  # And once more, close that connection!
+    return "Requested floor is now updated!"
+
+#____________________________________ROOM INFORMATION_______________________
 
 @app.route('/api/rooms/', methods=['GET'])  #ENDPOINT http://127.0.0.1:5000/api/room/all
 def room_list():
@@ -89,7 +126,7 @@ def find_room():
 
 #DELETE ROOM BY ID/CAPACITY/NUMBER
 @app.route('/api/room/<int:id>', methods=['DELETE'])
-def floor_delete():
+def room_delete():
     request_data = request.get_json()
     idtodelete = request_data['id']
 
@@ -101,7 +138,47 @@ def floor_delete():
     execute_myquery(conn, sql, (idtodelete,))
     conn.close()
     return "room is under unaccicable"
-#____________________________________GET ALL RESIDENTS_______________________
+
+#POST ROOM 
+@app.route('/api/room', methods=['POST'])
+def add_room():
+    request_data = request.get_json()
+    newcapacity = request_data['capacity']
+    newnumber = request_data['number']
+
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
+
+    # Had to fix this SQL query. Using parameters instead of string substitution.
+    sql = "INSERT INTO room(capacity, number) VALUES (%s, %s)"
+    execute_myquery(conn, sql, (newcapacity, newnumber))
+    conn.close()  # Connection would not work without being repeated and closed
+    return 'New room has been made!'
+
+#UPDATE ROOM 
+@app.route('/api/room/<int:id>', methods=['PUT'])
+def update_room():
+    if 'id' in request.args: #http://127.0.0.1:5000/api/room/<int:id>
+        id = int(request.args['id']) #User has to input ID
+    else:
+        return 'ID does not exist!'
+
+    request_data = request.get_json()
+    updatecapacity = request_data['capacity']
+    updatenumber = request_data['number']
+    updatefloor = request_data['floor_id']
+
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
+
+   #SQL query parameters were fixed
+    sql = "UPDATE room SET capacity=%s, number=%s, floor_id=%s"
+    execute_myquery(conn, sql, (updatecapacity, updatenumber, updatefloor, id))
+    conn.close()  # And once more, close that connection!
+    return "Requested room is now updated!"
+
+
+#____________________________________RESIDENTS INFORMATION_______________________
 
 @app.route('/api/residents/all', methods=['GET'])  #ENDPOINT http://127.0.0.1:5000/api/residents/all
 def senior_list():
@@ -129,7 +206,7 @@ def find_resident():
 
 #DELETE RESIDENTS BY ID/FIRSTNAME/LASTNAME/AGE/ROOMID
 @app.route('/api/residents/<int:id>', methods=['DELETE'])
-def floor_delete():
+def resident_delete():
     request_data = request.get_json()
     idtodelete = request_data['id']
 
@@ -142,13 +219,44 @@ def floor_delete():
     conn.close()
     return "This resident has left the premise"
 
+#POST RESIDENT 
 
+@app.route('/api/resident', methods=['POST'])
+def add_resident():
+    request_data = request.get_json()
+    newfname = request_data['firstname']
+    newlname = request_data['lastname']
+    newage = request_data['age']
 
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
 
+    # Had to fix this SQL query. Using parameters instead of string substitution.
+    sql = "INSERT INTO residents(firstname, lastname, age) VALUES (%s, %s, %s)"
+    execute_myquery(conn, sql, (newfname, newlname, newage))
+    conn.close()  # Connection would not work without being repeated and closed
+    return 'New resident has entered!'
 
+#UPDATE RESIDENT 
+@app.route('/api/residents/<int:id>', methods=['PUT'])
+def update_resident():
+    if 'id' in request.args: 
+        id = int(request.args['id']) #User has to input ID
+    else:
+        return 'ID does not exist!'
 
+    request_data = request.get_json()
+    updatefname = request_data['firstname']
+    updatelname = request_data['lastname']
+    updateage = request_data['age']
+    updateroomid = request_data['room_id']
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
 
+   #SQL query parameters were fixed
+    sql = "UPDATE resident SET firstname=%s, lastname=%s, age=%s, room_id=%s"
+    execute_myquery(conn, sql, (updatefname, updatelname, updateage, updateroomid,id))
+    conn.close() 
+    return "Requested resident is now updated!"
 
-
-
-app.run() #ALWAYS RUN BEFORE ANYTHING
+app.run(debug=True, use_reloader = False) #ALWAYS RUN BEFORE ANYTHING
