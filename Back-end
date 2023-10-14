@@ -20,7 +20,7 @@ app.config['DEBUG'] = True
 def defaultmessage():
     return "<h1> Welcome to a Paradise for Seniors! </h1>"
 
-#LOGIN API
+#LOGIN API- UNSURE IF IT WORKS
 
 @app.route('/login', methods=['POST'])
 def login():
