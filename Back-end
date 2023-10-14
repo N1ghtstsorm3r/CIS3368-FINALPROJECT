@@ -1,21 +1,20 @@
 """ Christine Simon - 1840920
 """
-# Creeate REST API
 import flask
-from flask import jsonify  # Pip install flask, if it ever breaks
+from flask import jsonify 
 from flask import request
 
  
 from sql import create_con
 from sql import execute_myquery
-from sql import execute_read_myquery #This written out only the functions you need
+from sql import execute_read_myquery
 
  
 import creds
 
 #APP will be the what pulls the application to the front for POSTMAN
 app = flask.Flask(__name__)  # This is your application name this is a restAPI file so the name would be RESTAPI
-app.config['DEBUG'] = True  # This is used to see any kind of errors in the browser, aka the 4xx, 5xx 3xx etc
+app.config['DEBUG'] = True 
 
 #____________________________TEST CONNECTION (Taken from Homework 2)_______________________________
 @app.route('/', methods=['GET'])
@@ -24,7 +23,7 @@ def defaultmessage():
 
 #____________________________________GET ALL FLOORS_______________________
 
-@app.route('/api/floor/all', methods=['GET'])  # USE THIS ENDPOINT ON POSTMAN http://127.0.0.1:5000/api/floor/all
+@app.route('/api/floor/all', methods=['GET'])  #ENDPOINT http://127.0.0.1:5000/api/floor/all
 def floor_list():
     myCreds = creds.creds()
     conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
@@ -33,20 +32,78 @@ def floor_list():
     conn.close()  # Just remembered to close the connection
     return jsonify(floor)
 
+
+#GET FLOOR BY ID/LEVEL/NAME
+@app.route('/api/floor/<int:id>', methods=['GET']) #ENDPOINT http://127.0.0.1:5000/api/floor/<int:id>
+def find_floor(): 
+    if 'id' in request.args:
+        id = int(request.args['id'])
+    else:
+        return 'Error: No ID is provided!'
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
+    sql = "SELECT * FROM floor WHERE id=%s" #Can also be WHERE level=%s or WHERE name=%s
+    floor = execute_read_myquery(conn, sql, (id,))
+    conn.close()  # Closing connection again
+    return jsonify(floor)
+
+#DELETE FLOOR BY ID/LEVEL/NAME
+@app.route('/api/floor/<int:id>', methods=['DELETE'])
+def floor_delete():
+    request_data = request.get_json()
+    idtodelete = request_data['id']
+
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
+
+    # Code taken from professor Suresh's class code
+    sql = "DELETE FROM floor WHERE id=%s"
+    execute_myquery(conn, sql, (idtodelete,))
+    conn.close()
+    return "Floor is now unavailable"
 #____________________________________GET ALL ROOMS_______________________
 
-@app.route('/api/rooms/all', methods=['GET'])  # USE THIS ENDPOINT ON POSTMAN http://127.0.0.1:5000/api/room/all
+@app.route('/api/rooms/', methods=['GET'])  #ENDPOINT http://127.0.0.1:5000/api/room/all
 def room_list():
     myCreds = creds.creds()
     conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
     sql = 'SELECT * FROM rooms'
     rooms = execute_read_myquery(conn, sql)
-    conn.close()  # Just remembered tSo close the connection
+    conn.close() 
     return jsonify(rooms)
 
+#GET ROOMS BY ID/CAPACITY/NUMBER
+@app.route('/api/room/<int:id>', methods=['GET']) #ENDPOINT http://127.0.0.1:5000/api/room/<int:id>
+def find_room():
+    if 'id' in request.args:
+        id = int(request.args['id'])
+    else:
+        return 'Error: No ID is provided!'
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
+    sql = "SELECT * FROM floor WHERE id=%s" #Can also be WHERE capacity=%s or WHERE number=%s
+    room = execute_read_myquery(conn, sql, (id,))
+    conn.close()  # Closing connection again
+    return jsonify(room)
+
+
+#DELETE ROOM BY ID/CAPACITY/NUMBER
+@app.route('/api/room/<int:id>', methods=['DELETE'])
+def floor_delete():
+    request_data = request.get_json()
+    idtodelete = request_data['id']
+
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
+
+    # Code taken from professor Suresh's class code
+    sql = "DELETE FROM room WHERE id=%s"
+    execute_myquery(conn, sql, (idtodelete,))
+    conn.close()
+    return "room is under unaccicable"
 #____________________________________GET ALL RESIDENTS_______________________
 
-@app.route('/api/residents/all', methods=['GET'])  # USE THIS ENDPOINT ON POSTMAN http://127.0.0.1:5000/api/residents/all
+@app.route('/api/residents/all', methods=['GET'])  #ENDPOINT http://127.0.0.1:5000/api/residents/all
 def senior_list():
     myCreds = creds.creds()
     conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
@@ -55,14 +112,35 @@ def senior_list():
     conn.close()  # Just remembered tSo close the connection
     return jsonify(residents)
 
-#____________________________________GET SPECIFIC DETAILS___________________________________________
+#GET RESIDENTS BY ID/FIRSTNAME/LASTNAME/AGE/ROOMID
+@app.route('/api/residents/<int:id>', methods=['GET']) #ENDPOINT http://127.0.0.1:5000/api/residents/<int:id>
+def find_resident():
+    if 'id' in request.args:
+        id = int(request.args['id'])
+    else:
+        return 'Error: No ID is provided!'
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
+    sql = "SELECT * FROM residents WHERE id=%s" #Can also be WHERE lastname=%s or WHERE firstname=%s
+    resident = execute_read_myquery(conn, sql, (id,))
+    conn.close()
+    return jsonify(resident)
 
-#GET FLOOR BY ID/LEVEL/NAME
 
+#DELETE RESIDENTS BY ID/FIRSTNAME/LASTNAME/AGE/ROOMID
+@app.route('/api/residents/<int:id>', methods=['DELETE'])
+def floor_delete():
+    request_data = request.get_json()
+    idtodelete = request_data['id']
 
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
 
-
-
+    # Code taken from professor Suresh's class code
+    sql = "DELETE FROM residents WHERE id=%s"
+    execute_myquery(conn, sql, (idtodelete,))
+    conn.close()
+    return "This resident has left the premise"
 
 
 
