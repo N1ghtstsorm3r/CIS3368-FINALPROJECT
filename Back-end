@@ -1,3 +1,76 @@
 """ Christine Simon - 1840920
 """
-#The backend code goes here
+# Creeate REST API
+import flask
+from flask import jsonify  # Pip install flask, if it ever breaks
+from flask import request
+
+ 
+from sql import create_con
+from sql import execute_myquery
+from sql import execute_read_myquery #This written out only the functions you need
+
+ 
+import creds
+
+#APP will be the what pulls the application to the front for POSTMAN
+app = flask.Flask(__name__)  # This is your application name this is a restAPI file so the name would be RESTAPI
+app.config['DEBUG'] = True  # This is used to see any kind of errors in the browser, aka the 4xx, 5xx 3xx etc
+
+#____________________________TEST CONNECTION (Taken from Homework 2)_______________________________
+@app.route('/', methods=['GET'])
+def defaultmessage():
+    return "<h1> Welcome to a Paradise for Seniors! </h1>"
+
+#____________________________________GET ALL FLOORS_______________________
+
+@app.route('/api/floor/all', methods=['GET'])  # USE THIS ENDPOINT ON POSTMAN http://127.0.0.1:5000/api/floor/all
+def floor_list():
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
+    sql = 'SELECT * FROM floor'
+    floor = execute_read_myquery(conn, sql)
+    conn.close()  # Just remembered to close the connection
+    return jsonify(floor)
+
+#____________________________________GET ALL ROOMS_______________________
+
+@app.route('/api/rooms/all', methods=['GET'])  # USE THIS ENDPOINT ON POSTMAN http://127.0.0.1:5000/api/room/all
+def room_list():
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
+    sql = 'SELECT * FROM rooms'
+    rooms = execute_read_myquery(conn, sql)
+    conn.close()  # Just remembered tSo close the connection
+    return jsonify(rooms)
+
+#____________________________________GET ALL RESIDENTS_______________________
+
+@app.route('/api/residents/all', methods=['GET'])  # USE THIS ENDPOINT ON POSTMAN http://127.0.0.1:5000/api/residents/all
+def senior_list():
+    myCreds = creds.creds()
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
+    sql = 'SELECT * FROM residents'
+    residents = execute_read_myquery(conn, sql)
+    conn.close()  # Just remembered tSo close the connection
+    return jsonify(residents)
+
+#____________________________________GET SPECIFIC DETAILS___________________________________________
+
+#GET FLOOR BY ID/LEVEL/NAME
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+app.run() #ALWAYS RUN BEFORE ANYTHING
