@@ -20,6 +20,15 @@ app.config['DEBUG'] = True
 def defaultmessage():
     return "<h1> Welcome to a Paradise for Seniors! </h1>"
 
+#LOGIN API
+
+@app.route('/login', methods=['POST'])
+def login():
+    if request.form['username'] == 'mary' and request.form['password'] == 'tree':
+        return 'Success'
+    else:
+        return 'That doesnt exist'
+
 #____________________________________FLOORS INFORMATION_______________________
 
 @app.route('/api/floor/all', methods=['GET'])  #ENDPOINT http://127.0.0.1:5000/api/floor/all
