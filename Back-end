@@ -31,18 +31,18 @@ def login():
 
 #____________________________________FLOORS INFORMATION_______________________
 
-@app.route('/api/floor/all', methods=['GET'])  #ENDPOINT http://127.0.0.1:5000/api/floor/all
+@app.route('/api/floors/all', methods=['GET'])  #ENDPOINT http://127.0.0.1:5000/api/floors/all
 def floor_list():
     myCreds = creds.creds()
-    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
-    sql = 'SELECT * FROM floor'
+    conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase) #THIS WORKS DONT TOUCH IT
+    sql = 'SELECT * FROM floors'
     floor = execute_read_myquery(conn, sql)
     conn.close()  # Just remembered to close the connection
     return jsonify(floor)
 
 
 #GET FLOOR BY ID/LEVEL/NAME
-@app.route('/api/floor/<int:id>', methods=['GET']) #ENDPOINT http://127.0.0.1:5000/api/floor/<int:id>
+@app.route('/api/floor/<int:id>', methods=['GET']) #ENDPOINT http://127.0.0.1:5000/api/floor/<int:id> HAS YET TO WORK
 def find_floor(): 
     if 'id' in request.args:
         id = int(request.args['id'])
@@ -65,8 +65,8 @@ def floor_delete():
     conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
 
     # Code taken from professor Suresh's class code
-    sql = "DELETE FROM floor WHERE id=%s"
-    execute_myquery(conn, sql, (idtodelete,))
+    sql = "DELETE FROM floor WHERE id=%s" % (idtodelete)
+    execute_myquery(conn, sql)
     conn.close()
     return "Floor is now unavailable"
 
@@ -81,10 +81,10 @@ def add_floor():
     conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
 
     # Had to fix this SQL query. Using parameters instead of string substitution.
-    sql = "INSERT INTO residents(firstname, lastname, age) VALUES (%s, %s)"
+    sql = "INSERT INTO floor(level, name) VALUES (%s, %s)"
     execute_myquery(conn, sql, (newlevel, newname))
     conn.close()  # Connection would not work without being repeated and closed
-    return 'New resident has entered!'
+    return 'New floor has opened!'
 
 #UPDATE FLOOR 
 @app.route('/api/floor/<int:id>', methods=['PUT'])
@@ -109,7 +109,7 @@ def update_floor():
 
 #____________________________________ROOM INFORMATION_______________________
 
-@app.route('/api/rooms/', methods=['GET'])  #ENDPOINT http://127.0.0.1:5000/api/room/all
+@app.route('/api/rooms/all', methods=['GET'])  #ENDPOINT http://127.0.0.1:5000/api/room/all THIS WORKS DONT TOUCH
 def room_list():
     myCreds = creds.creds()
     conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
@@ -189,7 +189,7 @@ def update_room():
 
 #____________________________________RESIDENTS INFORMATION_______________________
 
-@app.route('/api/residents/all', methods=['GET'])  #ENDPOINT http://127.0.0.1:5000/api/residents/all
+@app.route('/api/residents/all', methods=['GET'])  #ENDPOINT http://127.0.0.1:5000/api/residents/all THIS WORKS BUT ROOM ID IS BEING WEIRD
 def senior_list():
     myCreds = creds.creds()
     conn = create_con(myCreds.connectionstring, myCreds.username, myCreds.passwd, myCreds.dataBase)
